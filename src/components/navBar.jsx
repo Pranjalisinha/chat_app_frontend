@@ -1,40 +1,13 @@
 // src/components/NavBar.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTheme } from '../context/themeProvider';
 
 export default function NavBar() {
 	const location = useLocation();
 	const [open, setOpen] = useState(false);
-	const [isDark, setIsDark] = useState(false);
+	const { isDark, toggleTheme } = useTheme();
 	const isActive = (path) => location.pathname === path;
-
-	useEffect(() => {
-		const stored = localStorage.getItem("theme");
-		const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-		const dark = stored ? stored === "dark" : prefersDark;
-		setIsDark(dark);
-	}, []);
-
-	const setClass = (enable) => {
-		const root = document.documentElement;
-		const body = document.body;
-		if (enable) {
-			root.classList.add("dark");
-			body.classList.add("dark");
-		} else {
-			root.classList.remove("dark");
-			body.classList.remove("dark");
-		}
-	};
-
-	const toggleTheme = () => {
-		setIsDark((prev) => {
-			const next = !prev;
-			setClass(next);
-			localStorage.setItem("theme", next ? "dark" : "light");
-			return next;
-		});
-	};
 
 	return (
 		<header className="sticky top-0 z-40">
@@ -47,7 +20,11 @@ export default function NavBar() {
 						</div>
 
 						<div className="flex items-center gap-2">
-							<button onClick={toggleTheme} className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow hover:bg-gray-50 dark:border-white/10 dark:bg-gray-800 dark:text-gray-100" aria-label="Toggle theme">
+							<button 
+								onClick={toggleTheme} 
+								className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow hover:bg-gray-50 dark:border-white/10 dark:bg-gray-800 dark:text-gray-100" 
+								aria-label="Toggle theme"
+							>
 								{isDark ? (
 									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
 										<path d="M21.64 13a1 1 0 00-1.05-.14 8 8 0 01-10.45-10.45 1 1 0 00-.14-1.05A1 1 0 008 1a10 10 0 1015 15 1 1 0 00-.36-3z"/>

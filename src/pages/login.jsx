@@ -1,17 +1,68 @@
 // src/pages/Login.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import LoadingPage from "../components/loadingPage";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useNotification } from "../context/NotificationProvider";
+const BackendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 export default function Login() {
 	const [form, setForm] = useState({ email: "", password: "" });
 	const [remember, setRemember] = useState(true);
+	const [loading, setLoading] = useState(false);
 	const navigate = useNavigate();
+	const { showSuccess, showError } = useNotification()
 
-	const handleSubmit = (e) => {
+	useEffect(() => {
+		const token = Cookies.get("token");
+		if (token) {
+			navigate("/chat");
+		}
+	}, [navigate]);
+
+	const handleSubmit = async (e) => {
 		e.preventDefault();
-		console.log("Login form:", form, { remember });
-		navigate("/chat");
+		setLoading(true);
+		
+		try {
+			// Simulate API call
+			const loginData = await axios.post(`${BackendUrl}/api/users/login`, {
+				email: form.email,
+				password: form.password,
+			});
+			// await new Promise(resolve => setTimeout(resolve, 2000));
+			console.log("Login response:", loginData);
+			// Simulate login validation
+			if (loginData.status === 200) {
+				const { token, username } = loginData.data;
+				// Store token in cookies
+				if (remember) {
+					Cookies.set('token',token, {expires: 30 })
+					Cookies.set('username',username, {expires: 30 }	)
+				} else {
+					Cookies.set('token', token);
+					Cookies.set('username', username)
+				}
+				showSuccess("Login Successful", "Welcome back! Redirecting to chat...");
+				setTimeout(() => {
+					setLoading(false);
+					navigate("/chat");
+				}, 1000);
+			} else {
+				showError("Login Failed", "Invalid email or password. Please try again.");
+			}
+			setForm({ email: "", password: "" });
+		} catch (error) {
+			showError("Login Error", "Something went wrong. Please try again later.");
+		} finally {
+			setLoading(false);
+		}
 	};
+
+	if (loading) {
+		return <LoadingPage message="Signing you in..." />;
+	}
 
 	return (
 		<div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-gray-50 dark:bg-gray-900">
