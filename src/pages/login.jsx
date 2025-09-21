@@ -35,14 +35,18 @@ export default function Login() {
 			console.log("Login response:", loginData);
 			// Simulate login validation
 			if (loginData.status === 200) {
-				const { token, username } = loginData.data;
+				const { username, email, id } = loginData.data.data.user;
 				// Store token in cookies
 				if (remember) {
-					Cookies.set('token',token, {expires: 30 })
+					Cookies.set('token', loginData.data.data.token, {expires: 30 })
 					Cookies.set('username',username, {expires: 30 }	)
+					Cookies.set('email',email, {expires: 30 }	)
+					Cookies.set('userId',id, {expires: 30 }	)
 				} else {
-					Cookies.set('token', token);
-					Cookies.set('username', username)
+					Cookies.set('token', loginData.data.data.token);
+					Cookies.set('username', username);
+					Cookies.set('email',email);
+					Cookies.set('userId',id);
 				}
 				showSuccess("Login Successful", "Welcome back! Redirecting to chat...");
 				setTimeout(() => {

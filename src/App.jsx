@@ -15,19 +15,19 @@ import { ThemeProvider } from "./context/themeProvider";
 function App() {
   return (
     <ThemeProvider>
-    <NotificationProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Navigate to="/register" />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/chat" element={<Message />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/friends" element={<Friends />} />
-          <Route path="/invite" element={<Invite />} />
-        </Routes>
-      </BrowserRouter>
-    </NotificationProvider>
+      <NotificationProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Navigate to="/login" />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/chat" element={<Message />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/friends" element={<Friends />} />
+            <Route path="/invite" element={<Invite />} />
+          </Routes>
+        </BrowserRouter>
+      </NotificationProvider>
     </ThemeProvider>
   );
 }

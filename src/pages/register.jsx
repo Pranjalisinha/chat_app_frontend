@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import LoadingPage from "../components/loadingPage";
+import { useNotification } from "../context/NotificationProvider";
 const BackendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 export default function Register() {

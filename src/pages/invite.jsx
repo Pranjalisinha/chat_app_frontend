@@ -1,19 +1,38 @@
 // src/pages/Invite.jsx
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import NavBar from "../components/navBar";
+import ProfilePicture from "../components/ProfilePicture";
+import axios from "axios";
+import Cookies from "js-cookie";
+const BackendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const userId = Cookies.get("userId") || "defaultUser";
 
-const peopleData = [
-	{ id: 1, name: "David", invited: false },
-	{ id: 2, name: "Eva", invited: true },
-	{ id: 3, name: "Frank", invited: false },
-];
+// const peopleData = [
+// 	{ id: 1, name: "David", invited: false },
+// 	{ id: 2, name: "Eva", invited: true },
+// 	{ id: 3, name: "Frank", invited: false },
+// ];
 
 export default function Invite() {
 	const [query, setQuery] = useState("");
+	const [invitedPeople, setInvitedPeople] = useState([]);
+	useEffect(() => {
+		// document.title = "Invite - ChatApp";
+		const invitedPeople = async()=>{
+			// Fetch invited people from backend if needed
+			const response = await axios.get(`${BackendUrl}/api/users/invites`,{
+				headers: { authorization: `Bearer ${Cookies.get("token")}` },
+			}
+			);
+			console.log("Invited People:", response.data);
+			setInvitedPeople(response.data.data.users);
+		}
+		invitedPeople();
+	}, []);
 	const people = useMemo(() => {
 		const q = query.trim().toLowerCase();
-		if (!q) return peopleData;
-		return peopleData.filter((p) => p.name.toLowerCase().includes(q));
+		if (!q) return invitedPeople;
+		return invitedPeople.filter((p) => p.name.toLowerCase().includes(q));
 	}, [query]);
 
 	return (
@@ -42,10 +61,15 @@ export default function Invite() {
 						{people.map((p) => (
 							<li key={p.id} className="py-4 flex items-center justify-between gap-4">
 								<div className="flex items-center gap-3 min-w-0">
-									<div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-fuchsia-600 via-pink-500 to-amber-400" />
-									<p className="font-medium text-gray-800 dark:text-gray-100 truncate">{p.name}</p>
+								<ProfilePicture 
+										src={p.profilePicture || p.avatar} 
+										alt={p.username || p.name}
+										size="md"
+										fallbackClassName="bg-gradient-to-tr from-fuchsia-600 via-pink-500 to-amber-400"
+									/>
+									<p className="font-medium text-gray-800 dark:text-gray-100 truncate">{p.username || p.name}</p>
 								</div>
-								<button disabled={p.invited} className={`px-3 py-2 text-sm rounded-xl ${p.invited ? "badge-muted cursor-not-allowed" : "button-primary"}`}>{p.invited ? "Invited" : "Invite"}</button>
+								<button disabled={p.friendsRequests.includes(userId)} className={`px-3 py-2 text-sm rounded-xl ${p.friendsRequests.includes(userId) ? "badge-muted cursor-not-allowed" : "button-primary"}`}>{p.friendsRequests.includes(userId) ? "Invited" : "Invite"}</button>
 							</li>
 						))}
 						{people.length === 0 && (
