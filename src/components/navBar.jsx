@@ -55,12 +55,8 @@ export default function NavBar() {
 							<NavLink to="/chat" active={isActive("/chat")}>
 								Chat
 							</NavLink>
-							<NavLink to="/friends" active={isActive("/friends")}>
-								Friends
-							</NavLink>
-							<NavLink to="/invite" active={isActive("/invite")}>
-								Invite
-							</NavLink>
+                            {/* Friends removed */}
+                            {/* Invite removed */}
 							<NavLink to="/profile" active={isActive("/profile")}>
 								Profile
 							</NavLink>
@@ -74,12 +70,8 @@ export default function NavBar() {
 								<NavLink to="/chat" active={isActive("/chat")} onClick={() => setOpen(false)}>
 									Chat
 								</NavLink>
-								<NavLink to="/friends" active={isActive("/friends")} onClick={() => setOpen(false)}>
-									Friends
-								</NavLink>
-								<NavLink to="/invite" active={isActive("/invite")} onClick={() => setOpen(false)}>
-									Invite
-								</NavLink>
+                                {/* Friends removed */}
+                                {/* Invite removed */}
 								<NavLink to="/profile" active={isActive("/profile")} onClick={() => setOpen(false)}>
 									Profile
 								</NavLink>

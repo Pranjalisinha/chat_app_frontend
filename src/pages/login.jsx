@@ -5,6 +5,7 @@ import LoadingPage from "../components/loadingPage";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useNotification } from "../context/NotificationProvider";
+import { login as loginApi } from "../api/users";
 const BackendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 export default function Login() {
@@ -26,27 +27,19 @@ export default function Login() {
 		setLoading(true);
 		
 		try {
-			// Simulate API call
-			const loginData = await axios.post(`${BackendUrl}/api/users/login`, {
-				email: form.email,
-				password: form.password,
-			});
-			// await new Promise(resolve => setTimeout(resolve, 2000));
-			console.log("Login response:", loginData);
-			// Simulate login validation
-			if (loginData.status === 200) {
-				const { username, email, id } = loginData.data.data.user;
-				// Store token in cookies
+			const data = await loginApi({ email: form.email, password: form.password });
+			if (data?.user && data?.token) {
+				const { username, email, id } = data.user;
 				if (remember) {
-					Cookies.set('token', loginData.data.data.token, {expires: 30 })
-					Cookies.set('username',username, {expires: 30 }	)
-					Cookies.set('email',email, {expires: 30 }	)
-					Cookies.set('userId',id, {expires: 30 }	)
+					Cookies.set('token', data.token, { expires: 30 });
+					Cookies.set('username', username, { expires: 30 });
+					Cookies.set('email', email, { expires: 30 });
+					Cookies.set('userId', id, { expires: 30 });
 				} else {
-					Cookies.set('token', loginData.data.data.token);
+					Cookies.set('token', data.token);
 					Cookies.set('username', username);
-					Cookies.set('email',email);
-					Cookies.set('userId',id);
+					Cookies.set('email', email);
+					Cookies.set('userId', id);
 				}
 				showSuccess("Login Successful", "Welcome back! Redirecting to chat...");
 				setTimeout(() => {
@@ -58,7 +51,7 @@ export default function Login() {
 			}
 			setForm({ email: "", password: "" });
 		} catch (error) {
-			showError("Login Error", "Something went wrong. Please try again later.");
+			showError("Login Error", error?.response?.data?.error || "Something went wrong. Please try again later.");
 		} finally {
 			setLoading(false);
 		}

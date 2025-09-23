@@ -5,6 +5,7 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import LoadingPage from "../components/loadingPage";
 import { useNotification } from "../context/NotificationProvider";
+import { register as registerApi } from "../api/users";
 const BackendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 export default function Register() {
@@ -49,28 +50,22 @@ export default function Register() {
     setLoading(true);
     
     try {
-      // Simulate API call with delay
-	  const response = await axios.post(`${BackendUrl}/api/users/register`, {
+      const data = await registerApi({
         username: form.username,
         email: form.email,
         password: form.password,
       });
-	  
-    //   await new Promise(resolve => setTimeout(resolve, 2000));
-      // Simulate registration validation
-	  console.log("Registration response:", response);
-      if (response.statusCode === 400) {
-        showError("Registration Failed", "Email already exists. Please use a different email.");
-      } else {
+      if (data?.user) {
         showSuccess("Registration Successful", "Account created! Redirecting to login...");
         setTimeout(() => {
           navigate("/login");
-        }, 2000);
+        }, 1500);
       }
-	  setForm({ username: "", email: "", password: "", confirmPassword: "" });
+      setForm({ username: "", email: "", password: "", confirmPassword: "" });
     } catch (error) {
       console.error("Error during registration:", error);
-      showError("Registration Error", "Something went wrong. Please try again later.");
+      const msg = error?.response?.data?.error || "Something went wrong. Please try again later.";
+      showError("Registration Error", msg);
     } finally {
       setLoading(false);
     }

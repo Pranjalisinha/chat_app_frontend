@@ -5,12 +5,20 @@ import "./App.css";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Login from "./pages/login";
 import Register from "./pages/register";
-import Message from "./pages/Message";
-import Profile from "./pages/Profile";
-import Friends from "./pages/Friends";
-import Invite from "./pages/Invite";
+import Message from "./pages/message";
+import Profile from "./pages/profile";
+// Friends page removed
 import NotificationProvider from "./context/NotificationProvider";
 import { ThemeProvider } from "./context/themeProvider";
+import Cookies from "js-cookie";
+
+function RequireAuth({ children }) {
+  const token = Cookies.get("token");
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+}
 
 function App() {
   return (
@@ -21,10 +29,10 @@ function App() {
             <Route path="/" element={<Navigate to="/login" />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/chat" element={<Message />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/friends" element={<Friends />} />
-            <Route path="/invite" element={<Invite />} />
+            <Route path="/chat" element={<RequireAuth><Message /></RequireAuth>} />
+            <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+            {/* Friends route removed */}
+            {/* Invite route removed */}
           </Routes>
         </BrowserRouter>
       </NotificationProvider>

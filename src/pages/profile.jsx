@@ -1,13 +1,14 @@
 // src/pages/Profile.jsx
 import React from "react";
 import NavBar from "../components/navBar";
+import Cookies from "js-cookie";
 
 export default function Profile() {
-	const user = {
-		username: "John Doe",
-		email: "john@example.com",
-		bio: "AI enthusiast and full-stack dev.",
-	};
+  const user = {
+    username: Cookies.get("username") || "",
+    email: Cookies.get("email") || "",
+    bio: "",
+  };
 
 	return (
 		<div className="flex flex-col min-h-screen section-strong">
@@ -36,7 +37,7 @@ export default function Profile() {
 						</div>
 					</div>
 
-					<div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+					{/* <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
 						<div className="container-card p-4 text-center section-surface">
 							<p className="text-2xl font-semibold text-gray-800 dark:text-gray-100">128</p>
 							<p className="text-sm text-gray-500 dark:text-gray-400">Messages</p>
@@ -49,7 +50,7 @@ export default function Profile() {
 							<p className="text-2xl font-semibold text-gray-800 dark:text-gray-100">5</p>
 							<p className="text-sm text-gray-500 dark:text-gray-400">Groups</p>
 						</div>
-					</div>
+					</div> */}
 				</div>
 			</div>
 		</div>
