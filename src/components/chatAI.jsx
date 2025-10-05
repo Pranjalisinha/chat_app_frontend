@@ -7,6 +7,9 @@ import { connectSocket, getSocket } from "../api/socket";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
+import { SparklesIcon } from "@heroicons/react/24/outline";
+import { rewriteMessage } from "../utils/rewrite";
+import { rewriteWithAI } from "../api/ai";
 
 export default function ChatAI() {
   const myUserId = Cookies.get("userId") || "";
@@ -117,21 +120,40 @@ export default function ChatAI() {
     }
   };
 
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiMenuOpen, setAiMenuOpen] = useState(false);
+  const applyAIRewrite = async (style) => {
+    const current = (input || "").trim();
+    if (!current) return;
+    try {
+      setAiLoading(true);
+      const rewritten = await rewriteWithAI(current, style);
+      setInput(rewritten);
+    } catch (e) {
+      // Fallback to local heuristic if AI fails
+      setInput(prev => rewriteMessage(prev, style));
+      console.error("AI rewrite failed, used local fallback:", e);
+    } finally {
+      setAiLoading(false);
+      setAiMenuOpen(false);
+    }
+  };
+
   return (
-    <div className="h-full grid grid-cols-1 md:grid-cols-12 gap-0 md:gap-6">
+    <div className="h-full grid grid-cols-1 md:grid-cols-12 gap-0 md:gap-6 overflow-hidden bg-white dark:bg-gray-900">
       {/* Sidebar */}
       <div className="md:col-span-4 lg:col-span-3">
         <div className="md:hidden mb-3 flex justify-between items-center">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Users</h2>
           <button
-            className="button-primary"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg dark:bg-indigo-500 dark:hover:bg-indigo-600"
             onClick={() => setSidebarOpen((v) => !v)}
             aria-expanded={sidebarOpen}
           >
             {sidebarOpen ? "Close" : "Open"}
           </button>
         </div>
-        <div className={`container-card p-4 md:block ${sidebarOpen ? "block" : "hidden"} md:!block`}>
+        <div className={`bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 md:block ${sidebarOpen ? "block" : "hidden"} md:!block`}>
           <div className="flex items-center gap-2 mb-3">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-blue-600 via-sky-500 to-emerald-500" />
             <h3 className="font-semibold text-gray-800 dark:text-gray-100">All users</h3>
@@ -157,9 +179,9 @@ export default function ChatAI() {
       </div>
 
       {/* Chat window */}
-      <div className="md:col-span-8 lg:col-span-9 container-card p-0 flex flex-col h-full overflow-hidden relative">
+      <div className="md:col-span-8 lg:col-span-9 bg-white dark:bg-gray-800 rounded-lg shadow-lg flex flex-col h-full overflow-hidden relative">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/50 dark:border-white/10">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-violet-500 to-blue-400" />
             <div>
@@ -172,7 +194,7 @@ export default function ChatAI() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-white/60 dark:bg-gray-900/40 pb-24">
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-gray-50 dark:bg-gray-900">
           {messages.map((m) => (
             <div key={m.id} className={`flex ${m.fromMe ? "justify-end" : "justify-start"}`}>
               <div
@@ -188,20 +210,12 @@ export default function ChatAI() {
           ))}
         </div>
 
-        {/* Input - Updated positioning and width */}
-        <div className="fixed bottom-0 border-t border-white/50 dark:border-white/10 bg-white/80 dark:bg-gray-900/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+        {/* Input - cleaner grouped UI */}
+        <div className="sticky bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <div className="max-w-full px-4 py-3">
-            <div className="flex items-end gap-2 relative">
-              <button
-                onClick={() => setShowEmoji(v => !v)}
-                className="flex-shrink-0 inline-flex items-center justify-center rounded-md border border-gray-200 bg-white text-gray-700 px-3 py-2 shadow hover:bg-gray-50 dark:border-white/10 dark:bg-gray-800 dark:text-gray-100"
-                aria-label="Toggle emoji picker"
-              >
-                😊
-              </button>
-              
+            <div className="relative">
               {showEmoji && (
-                <div className="absolute bottom-14 left-0 z-10">
+                <div className="absolute bottom-16 left-2 z-10">
                   <Picker 
                     data={data} 
                     onEmojiSelect={(e) => insertAtCursor(e.native)} 
@@ -212,8 +226,16 @@ export default function ChatAI() {
                   />
                 </div>
               )}
-              
-              <div className="flex-1 relative">
+
+              <div className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-2">
+                <button
+                  onClick={() => setShowEmoji(v => !v)}
+                  className="flex-shrink-0 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:bg-gray-700 dark:text-gray-100"
+                  aria-label="Toggle emoji picker"
+                >
+                  😊
+                </button>
+
                 <textarea
                   ref={inputRef}
                   id="message"
@@ -221,7 +243,7 @@ export default function ChatAI() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Type a message..."
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 dark:focus:border-indigo-400 text-gray-900 dark:text-white resize-none"
+                  className="flex-1 max-h-32 px-3 py-2 bg-transparent dark:bg-transparent border-0 focus:ring-0 focus:outline-none placeholder-gray-400 dark:placeholder-gray-400 text-gray-900 dark:text-white resize-none"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -229,15 +251,55 @@ export default function ChatAI() {
                     }
                   }}
                 />
+
+                <div className="relative flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setAiMenuOpen(v => !v)}
+                    disabled={aiLoading}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed dark:border-white/10 dark:bg-gray-700 dark:text-gray-100"
+                    aria-haspopup="menu"
+                    aria-expanded={aiMenuOpen}
+                    aria-label="AI rewrite menu"
+                  >
+                    {aiLoading ? (
+                      <span className="text-xs">...</span>
+                    ) : (
+                      <SparklesIcon className="h-5 w-5" />
+                    )}
+                  </button>
+                  <button
+                    onClick={sendMessage}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-colors"
+                    aria-label="Send message"
+                  >
+                    <PaperAirplaneIcon className="h-5 w-5 rotate-310" />
+                  </button>
+
+                  {aiMenuOpen && !aiLoading && (
+                    <div className="absolute bottom-12 right-0 z-20 w-40 rounded-lg border border-gray-200 bg-white p-1 shadow-lg dark:border-white/10 dark:bg-gray-800">
+                      <button
+                        className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                        onClick={() => applyAIRewrite("restructure")}
+                      >
+                        Restructure
+                      </button>
+                      <button
+                        className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                        onClick={() => applyAIRewrite("funny")}
+                      >
+                        Funny
+                      </button>
+                      <button
+                        className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                        onClick={() => applyAIRewrite("sarcastic")}
+                      >
+                        Sarcastic
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-              
-              <button
-                onClick={sendMessage}
-                className="flex-shrink-0 inline-flex items-center justify-center rounded-md bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 font-medium shadow-sm transition-colors"
-                aria-label="Send message"
-              >
-                <PaperAirplaneIcon className="h-5 w-5 rotate-90" />
-              </button>
             </div>
           </div>
         </div>

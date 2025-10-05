@@ -9,7 +9,7 @@ import Message from "./pages/message";
 import Profile from "./pages/profile";
 // Friends page removed
 import NotificationProvider from "./context/NotificationProvider";
-import { ThemeProvider } from "./context/themeProvider";
+import { ThemeProvider } from "./context/ThemeContext";
 import Cookies from "js-cookie";
 
 function RequireAuth({ children }) {
@@ -23,19 +23,33 @@ function RequireAuth({ children }) {
 function App() {
   return (
     <ThemeProvider>
-      <NotificationProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Navigate to="/login" />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/chat" element={<RequireAuth><Message /></RequireAuth>} />
-            <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
-            {/* Friends route removed */}
-            {/* Invite route removed */}
-          </Routes>
-        </BrowserRouter>
-      </NotificationProvider>
+      <div className="min-h-screen bg-light-bg-primary dark:bg-dark-bg-primary transition-colors duration-200">
+        <NotificationProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Navigate to="/login" />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route
+                path="/chat"
+                element={
+                  <RequireAuth>
+                    <Message />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <RequireAuth>
+                    <Profile />
+                  </RequireAuth>
+                }
+              />
+            </Routes>
+          </BrowserRouter>
+        </NotificationProvider>
+      </div>
     </ThemeProvider>
   );
 }

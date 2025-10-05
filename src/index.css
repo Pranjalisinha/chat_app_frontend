@@ -23,15 +23,13 @@
 		--accent-secondary: #6366f1;
 	}
 
-	html, body, #root {
-		height: 100%;
-	}
+    html, body, #root {
+        height: 100%;
+    }
 
-	body {
-		@apply antialiased;
-		background-color: var(--bg-secondary);
-		color: var(--text-primary);
-	}
+    body {
+        @apply antialiased bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100;
+    }
 	
 	/* Custom component styles */
 	@layer components {
@@ -69,39 +67,13 @@
 		position: relative;
 		overflow-x: hidden; */
 	.dark body { background-image: var(--bg-gradient-dark); }
-	/* Animated dynamic background layer */
-	body::before {
-		content: "";
-		position: fixed;
-		inset: -20% -10% -10% -20%;
-		z-index: -1;
-		background:
-			radial-gradient(180px 180px at 15% 20%, rgba(99,102,241,0.20), transparent 60%),
-			radial-gradient(240px 200px at 85% 25%, rgba(56,189,248,0.18), transparent 60%),
-			radial-gradient(220px 200px at 50% 90%, rgba(34,197,94,0.14), transparent 60%),
-			radial-gradient(160px 160px at 70% 75%, rgba(236,72,153,0.12), transparent 60%);
-		filter: blur(6px) saturate(1.05);
-		animation: float-blobs 24s ease-in-out infinite alternate;
-	}
-	.dark body::before {
-		background:
-			radial-gradient(180px 180px at 15% 20%, rgba(99,102,241,0.13), transparent 60%),
-			radial-gradient(240px 200px at 85% 25%, rgba(56,189,248,0.12), transparent 60%),
-			radial-gradient(220px 200px at 50% 90%, rgba(34,197,94,0.10), transparent 60%),
-			radial-gradient(160px 160px at 70% 75%, rgba(236,72,153,0.10), transparent 60%);
-		filter: blur(8px) saturate(1.0);
-	}
-	@keyframes float-blobs {
-		0% { transform: translate3d(0,0,0) scale(1); }
-		50% { transform: translate3d(2%, -1%, 0) scale(1.02); }
-		100% { transform: translate3d(-2%, 1%, 0) scale(1.01); }
-	}
+    /* Removed decorative background layer for clear theme contrast */
 }
 
 @layer components {
-	.container-card {
-		@apply bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/80 rounded-2xl shadow-xl shadow-black/10 border-2 border-gray-200 dark:bg-gray-900/90 dark:supports-[backdrop-filter]:bg-gray-900/80 dark:border-gray-700;
-	}
+    .container-card {
+        @apply bg-white rounded-2xl shadow-xl shadow-black/10 border-2 border-gray-200 dark:bg-gray-900 dark:border-gray-700;
+    }
 	.button-primary {
 		@apply inline-flex items-center justify-center rounded-xl bg-blue-600 text-white px-4 py-2 font-medium shadow-sm hover:bg-blue-700 active:bg-blue-800 transition-colors;
 	}
