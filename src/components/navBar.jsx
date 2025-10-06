@@ -1,13 +1,11 @@
 // src/components/NavBar.jsx
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useTheme } from "../context/ThemeContext";
-import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
+// theme toggle removed
 
 export default function NavBar() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
-  const { theme, toggleTheme } = useTheme();
   const isActive = (path) => location.pathname === path;
 
   return (
@@ -22,7 +20,7 @@ export default function NavBar() {
               </h1>
             </div>
 
-            {/* Desktop nav links and theme toggle */}
+            {/* Desktop nav links */}
             <div className="hidden sm:flex items-center gap-2">
               <NavLink to="/chat" active={isActive("/chat")}>
                 Chat
@@ -30,18 +28,6 @@ export default function NavBar() {
               <NavLink to="/profile" active={isActive("/profile")}>
                 Profile
               </NavLink>
-              {/* Theme toggle button */}
-              <button
-                onClick={toggleTheme}
-                className="px-2 py-1.5 rounded-lg inline-flex items-center gap-2 border border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
-                aria-label="Toggle theme"
-              >
-                {theme === "dark" ? (
-                  <SunIcon className="h-5 w-5 text-yellow-400" />
-                ) : (
-                  <MoonIcon className="h-5 w-5 text-gray-800" />
-                )}
-              </button>
             </div>
 
             {/* Mobile menu toggle */}
@@ -93,18 +79,7 @@ export default function NavBar() {
                 >
                   Profile
                 </NavLink>
-                {/* Theme toggle button for mobile */}
-                <button
-                  onClick={toggleTheme}
-                  className="p-2 rounded-lg mt-2"
-                  aria-label="Toggle theme"
-                >
-                  {theme === "dark" ? (
-                    <SunIcon className="h-5 w-5 text-yellow-400" />
-                  ) : (
-                    <MoonIcon className="h-5 w-5 text-gray-800" />
-                  )}
-                </button>
+                {/* theme toggle removed from mobile */}
               </div>
             </div>
           )}

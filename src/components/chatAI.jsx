@@ -20,6 +20,7 @@ export default function ChatAI() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showEmoji, setShowEmoji] = useState(false);
   const inputRef = useRef(null);
+  const listRef = useRef(null);
 
   useEffect(() => {
     // Connect socket and set up listeners
@@ -70,13 +71,26 @@ export default function ChatAI() {
           text: m.decryptedContent || "",
           createdAt: m.createdAt,
         }));
-        setMessages(normalized);
+        // Oldest first so newest appears at the bottom
+        const sorted = [...normalized].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        setMessages(sorted);
       } catch (error) {
         console.error("Error loading messages:", error);
       }
     };
     loadMessages();
   }, [selectedUser, myUserId]);
+
+  // Always stick view to bottom when opening a chat and when new messages arrive
+  const scrollToBottom = () => {
+    const el = listRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [selectedUser, messages.length]);
 
   const insertAtCursor = (emoji) => {
     const textarea = inputRef.current;
@@ -193,8 +207,8 @@ export default function ChatAI() {
           </div>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-gray-50 dark:bg-gray-900">
+        {/* Messages (newest pinned at bottom; scroll up for older) */}
+        <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-gray-50 dark:bg-gray-900">
           {messages.map((m) => (
             <div key={m.id} className={`flex ${m.fromMe ? "justify-end" : "justify-start"}`}>
               <div
